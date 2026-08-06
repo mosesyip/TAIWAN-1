@@ -1,14 +1,14 @@
-import concurrent.futures
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import datetime
 import json
 import re
+import sys
 import requests
 import yfinance as yf
 
 
 def get_taiwan_stock_list():
-  """抓取全台灣上市 (TWSE) 與上櫃 (TPEx) 股票代碼列表"""
+  """抓取全台股上市 (TWSE) 與上櫃 (TPEx) 股票清單 (官方 OpenAPI)"""
   stocks = []
   headers = {
       'User-Agent': (
@@ -16,25 +16,56 @@ def get_taiwan_stock_list():
       )
   }
 
-  modes = [('2', '.TW'), ('4', '.TWO')]
-
-  for mode, suffix in modes:
-    try:
-      url = f'https://isin.twse.com.tw/isin/C_public.jsp?strMode={mode}'
-      res = requests.get(url, headers=headers, timeout=10)
-      res.encoding = 'big5'
-
-      matches = re.findall(r'(\d{4})\s+([^\s<]+)', res.text)
-      for code, name in matches:
+  # 1. 上市股票 (TWSE OpenAPI)
+  try:
+    url_twse = 'https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL'
+    res = requests.get(url_twse, headers=headers, timeout=10)
+    if res.status_code == 200:
+      for item in res.json():
+        code = item.get('Code', '').strip()
+        name = item.get('Name', '').strip()
         if len(code) == 4 and code.isdigit():
-          stocks.append({
-              'symbol': f'{code}{suffix}',
-              'code': code,
-              'name': name.strip(),
-          })
-    except Exception as e:
-      print(f'抓取股票清單失敗 (Mode {mode}): {e}')
+          stocks.append({'symbol': f'{code}.TW', 'code': code, 'name': name})
+  except Exception as e:
+    print(f'⚠️ TWSE OpenAPI 抓取失敗: {e}')
 
+  # 2. 上櫃股票 (TPEx OpenAPI)
+  try:
+    url_tpex = (
+        'https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratio_analysis'
+    )
+    res = requests.get(url_tpex, headers=headers, timeout=10)
+    if res.status_code == 200:
+      for item in res.json():
+        code = item.get('SecuritiesCompanyCode', '').strip() or item.get(
+            'Code', ''
+        ).strip()
+        name = item.get('CompanyName', '').strip() or item.get(
+            'Name', ''
+        ).strip()
+        if len(code) == 4 and code.isdigit():
+          stocks.append({'symbol': f'{code}.TWO', 'code': code, 'name': name})
+  except Exception as e:
+    print(f'⚠️ TPEx OpenAPI 抓取失敗: {e}')
+
+  # 3. 備援爬蟲 (萬一 OpenAPI 取得數量不足時)
+  if len(stocks) < 500:
+    print('⚠️ OpenAPI 數量不足，啟用 ISIN 備用爬蟲...')
+    try:
+      for mode, suffix in [('2', '.TW'), ('4', '.TWO')]:
+        url = f'https://isin.twse.com.tw/isin/C_public.jsp?strMode={mode}'
+        r = requests.get(url, headers=headers, timeout=10)
+        r.encoding = 'big5'
+        matches = re.findall(r'(\d{4})\s+([^\s<]+)', r.text)
+        for code, name in matches:
+          if len(code) == 4 and code.isdigit():
+            stocks.append(
+                {'symbol': f'{code}{suffix}', 'code': code, 'name': name.strip()}
+            )
+    except Exception as e:
+      print(f'⚠️ ISIN 爬蟲失敗: {e}')
+
+  # 去除重複股票
   unique_stocks = {s['symbol']: s for s in stocks}.values()
   return list(unique_stocks)
 
@@ -58,10 +89,10 @@ def fetch_and_process_stock(stock_item):
     if not price or price <= 0:
       return None
 
-    # 1. 本益比 (P/E)
+    # 1. 本益比 (P/E < 20)
     pe_ratio = info.get('trailingPE')
 
-    # 2. 現金殖利率 (yfinance 回傳 0.0312 代表 3.12%)
+    # 2. 現金殖利率 (Yield >= 2.5%, yfinance 回傳 0.0312 代表 3.12%)
     div_yield_raw = info.get('dividendYield')
     yield_pct = (
         (div_yield_raw * 100)
@@ -69,13 +100,13 @@ def fetch_and_process_stock(stock_item):
         else 0.0
     )
 
-    # 3. 總市值 (原始金額轉為億元)
+    # 3. 總市值 (< 1,000 億 TWD)
     market_cap_raw = info.get('marketCap', 0)
     market_cap_billion = (
         (market_cap_raw / 100_000_000) if market_cap_raw else 0.0
     )
 
-    # 4. 20 日成交均額 (均量 * 股價)
+    # 4. 20 日成交均額 (>= 1,500 萬 TWD)
     avg_vol = (
         info.get('averageVolume10days')
         or info.get('averageVolume')
@@ -84,7 +115,7 @@ def fetch_and_process_stock(stock_item):
     )
     turnover_20d = avg_vol * price
 
-    # --- 篩選門檻判斷 ---
+    # --- 條件篩選 ---
     is_pe_pass = bool(pe_ratio and 0 < pe_ratio <= 20)
     is_yield_pass = yield_pct >= 2.5
     is_mcap_pass = 0 < market_cap_billion <= 1000
@@ -122,7 +153,7 @@ def fetch_and_process_stock(stock_item):
         ),
     }
 
-    # 防呆機制：只要符合 2 項以上條件即保留，確保榜單永遠有資料顯示
+    # 至少符合 2 項條件納入備選池，確保榜單排序完整
     passed_conditions = sum(
         [is_pe_pass, is_yield_pass, is_mcap_pass, is_turnover_pass]
     )
@@ -141,9 +172,12 @@ def main():
   stocks_list = get_taiwan_stock_list()
   print(f'📊 成功取得台股清單，共 {len(stocks_list)} 檔股票')
 
+  if len(stocks_list) == 0:
+    print('❌ 錯誤：無法抓取台股清單，中斷執行以保護數據。')
+    sys.exit(1)
+
   all_results = []
 
-  # 維持 10 個小幫手平行處理 (兼顧速度與 IP 安全)
   with ThreadPoolExecutor(max_workers=10) as executor:
     future_to_stock = {
         executor.submit(fetch_and_process_stock, item): item
@@ -162,12 +196,13 @@ def main():
       if res:
         all_results.append(res)
 
-  # 按 AI CP 值高低排序
-  all_results.sort(key=lambda x: x['cp_score'], reverse=True)
+  if len(all_results) == 0:
+    print('🚨 警告：本次掃描結果為 0，放棄更新以保護原有資料。')
+    sys.exit(1)
 
+  all_results.sort(key=lambda x: x['cp_score'], reverse=True)
   full_matches = [s for s in all_results if s['is_full_match']]
 
-  # 若完全符合門檻不滿 20 檔，自動補充高 CP 值的優質備選股
   top_20 = (
       full_matches[:20]
       if len(full_matches) >= 20
@@ -180,17 +215,17 @@ def main():
   )
 
   print(
-      f'✅ 掃描完成！符合條件標的共 {len(all_results)} 檔，完全符合門檻共'
+      f'✅ 掃描完成！候選池共 {len(all_results)} 檔，完全符合門檻共'
       f' {len(full_matches)} 檔。'
   )
 
-  # 寫入 JSON (同時輸出 data.json 與 stocks.json 確保前端完美相容)
   output_payload = {
       'update_time': datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
       'total_scraped': len(stocks_list),
       'matched_count': len(full_matches),
       'stocks': top_20,
       'candidates': all_results[:50],
+      'data': top_20,
   }
 
   for filename in ['data.json', 'stocks.json']:
