@@ -2,34 +2,35 @@ name: Auto Update Stock Data
 
 on:
   schedule:
-    - cron: '0 6 * * *'  # 台灣時間每日 14:00 自動執行
-  workflow_dispatch:      # 支援手動點擊測試
+    - cron: '0 6 * * *'  # 每日台灣時間 14:00 自動執行
+  workflow_dispatch:
 
 permissions:
-  contents: write         # 給予機器人寫入檔案的權限
+  contents: write  # 賦予寫入權限，讓 Actions 可以 Push 檔案
 
 jobs:
   update-data:
     runs-on: ubuntu-latest
     steps:
-      - name: 檢查專案程式碼
-        uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: 設定 Python 環境
-        uses: actions/setup-python@v5
+      - name: Set up Python
+        uses: actions/setup-python@v4
         with:
           python-version: '3.10'
 
-      - name: 安裝必要套件
-        run: pip install pandas yfinance html5lib lxml
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests yfinance
 
-      - name: 執行選股與數據更新
+      - name: Run crawler script
         run: python main.py
 
-      - name: 推送最新數據回 GitHub
+      - name: Commit and Push updated data
         run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-          git add stocks.json || true
-          git commit -m "Auto update stock data" || exit 0
-          git push
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data.json stocks.json
+          git diff --quiet && git diff --staged --quiet || (git commit -m "auto: update stock json data" && git push)
