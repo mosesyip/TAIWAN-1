@@ -3,142 +3,140 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>全台股 AI 量化嚴選 TOP 20</title>
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <title>全台股 AI 量化嚴選看板</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body { background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Microsoft JhengHei", sans-serif; }
+    .card-shadow { box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.05); }
+  </style>
 </head>
-<body class="bg-slate-50 min-h-screen text-slate-800 p-4 md:p-8">
-
-  <div class="max-w-6xl mx-auto space-y-6">
-    <!-- 頂部 Hero 卡片 -->
-    <div class="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-slate-100">
-      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-2">
-            🌱 全台股 AI 量化嚴選 TOP 20
-          </h1>
-          <p class="text-slate-500 text-sm mt-1">
-            自動掃描全台 2000+ 股票，結合 4 大基本面門檻與 AI 綜合 CP 值深度排序
-          </p>
-        </div>
-        <div class="flex items-center gap-2 self-start md:self-auto bg-emerald-50 text-emerald-700 px-3 py-1.5 rounded-full text-xs font-semibold">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-          <span id="update-time">每日自動掃描中</span>
-        </div>
+<body class="p-4 md:p-8">
+  <div class="max-w-7xl mx-auto">
+    
+    <!-- 頁頭資訊 -->
+    <div class="bg-white rounded-2xl p-6 mb-8 card-shadow flex flex-col md:flex-row justify-between items-start md:items-center border border-slate-100">
+      <div>
+        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 flex items-center gap-2">
+          <i class="fa-solid me-2 fa-chart-line text-emerald-500"></i>全台股 AI 量化嚴選 TOP 20
+        </h1>
+        <p class="text-slate-500 text-sm mt-1">每日自動掃描上市櫃股票，依據本益比、殖利率與成交量綜合嚴選</p>
       </div>
-
-      <!-- 4 大基本面門檻卡片 -->
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
-        <div class="bg-amber-50/60 p-4 rounded-2xl border border-amber-100">
-          <div class="font-bold text-slate-800 text-sm md:text-base">1. 熱門易買賣</div>
-          <div class="text-xs md:text-sm text-slate-500 mt-1">20日均額 ≥ 1,500萬</div>
-        </div>
-        <div class="bg-emerald-50/60 p-4 rounded-2xl border border-emerald-100">
-          <div class="font-bold text-slate-800 text-sm md:text-base">2. 價格不買貴</div>
-          <div class="text-xs md:text-sm text-slate-500 mt-1">本益比 &lt; 20 倍</div>
-        </div>
-        <div class="bg-blue-50/60 p-4 rounded-2xl border border-blue-100">
-          <div class="font-bold text-slate-800 text-sm md:text-base">3. 高年領利息</div>
-          <div class="text-xs md:text-sm text-slate-500 mt-1">現金殖利率 ≥ 2.5%</div>
-        </div>
-        <div class="bg-purple-50/60 p-4 rounded-2xl border border-purple-100">
-          <div class="font-bold text-slate-800 text-sm md:text-base">4. 潛力中小型</div>
-          <div class="text-xs md:text-sm text-slate-500 mt-1">總市值 &lt; 1,000 億</div>
-        </div>
+      <div class="mt-4 md:mt-0 bg-emerald-50 text-emerald-700 px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-2 border border-emerald-100">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="update-time">更新中...</span>
       </div>
     </div>
 
-    <!-- 標題與排序說明 -->
-    <div class="flex items-center justify-between px-2">
-      <h2 class="text-xl font-bold text-slate-900 flex items-center gap-2">
-        🏆 今日精選 Top 20 榜單
+    <!-- 篩選條件說明卡片 -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white p-4 rounded-xl border border-slate-100 card-shadow">
+        <div class="text-xs text-slate-400 font-bold mb-1">1. 流動性高</div>
+        <div class="text-sm font-bold text-slate-700">日成交額 ≥ 1,500 萬</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-100 card-shadow">
+        <div class="text-xs text-slate-400 font-bold mb-1">2. 價格不貴</div>
+        <div class="text-sm font-bold text-slate-700">本益比 < 20 倍</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-100 card-shadow">
+        <div class="text-xs text-slate-400 font-bold mb-1">3. 高年領利息</div>
+        <div class="text-sm font-bold text-slate-700">現金殖利率 ≥ 2.5%</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl border border-slate-100 card-shadow">
+        <div class="text-xs text-slate-400 font-bold mb-1">4. 潛力股池</div>
+        <div class="text-sm font-bold text-slate-700">全市場動態計算 CP 值</div>
+      </div>
+    </div>
+
+    <!-- 股票卡片列表區塊 -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+        <i class="fa-solid fa-trophy text-amber-500"></i> 今日精選 Top 20 榜單
       </h2>
-      <span class="text-xs text-slate-400">依 AI 綜合 CP 值與符合條件數排序</span>
+      <span class="text-xs text-slate-400">依 AI 綜合 CP 值由高至低排序</span>
     </div>
 
-    <!-- 卡片容器 -->
-    <div id="stock-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-      <div class="col-span-full py-16 text-center text-slate-400">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-300 border-t-emerald-500 mb-3"></div>
-        <p>資料載入中，請稍候...</p>
-      </div>
+    <div id="stock-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <!-- 卡片內容將由 JavaScript 動態渲染 -->
     </div>
+
   </div>
 
   <script>
-    async function fetchStockData() {
-      const grid = document.getElementById('stock-grid');
-      const updateTimeEl = document.getElementById('update-time');
-
+    async function loadStockData() {
       try {
-        let response = await fetch('data.json?t=' + new Date().getTime());
-        if (!response.ok) {
-          response = await fetch('stocks.json?t=' + new Date().getTime());
-        }
-        
-        const payload = await response.json();
-        const stocks = payload.stocks || payload.data || [];
+        // 加上時間戳記強迫瀏覽器重新向伺服器抓取，打破快取
+        const response = await fetch('./data.json?t=' + new Date().getTime(), {
+          cache: 'no-store'
+        });
+        const data = await response.json();
 
-        if (payload.update_time) {
-          updateTimeEl.textContent = '更新時間：' + payload.update_time;
-        }
+        document.getElementById('update-time').innerText = '更新時間：' + (data.update_time || '即時');
 
-        if (!stocks || stocks.length === 0) {
-          grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400">目前市場無符合條件的標的</div>`;
-          return;
-        }
+        const grid = document.getElementById('stock-grid');
+        grid.innerHTML = '';
 
-        grid.innerHTML = stocks.map((s, idx) => `
-          <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md transition-shadow relative overflow-hidden flex flex-col justify-between">
-            <div>
-              <div class="flex items-start justify-between">
-                <div>
+        data.stocks.forEach((stock, index) => {
+          const rank = index + 1;
+          const badgeClass = rank <= 3 ? 'bg-amber-500 text-white' : 'bg-slate-200 text-slate-600';
+
+          const cardHtml = `
+            <div class="bg-white rounded-2xl p-5 border border-slate-100 card-shadow hover:shadow-lg transition-all relative flex flex-col justify-between">
+              <div>
+                <!-- 卡片頂部：名次 + 代碼 + 中文股名 + CP分數 -->
+                <div class="flex justify-between items-center mb-4">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-2 py-0.5 rounded ${idx < 3 ? 'bg-amber-100 text-amber-700' : 'bg-slate-100 text-slate-600'}">
-                      #${idx + 1}
-                    </span>
-                    <span class="text-xs text-slate-400 font-mono">${s.symbol}</span>
+                    <span class="px-2.5 py-1 rounded-lg font-black text-xs ${badgeClass}">#${rank}</span>
+                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-mono font-bold text-sm">${stock.symbol}</span>
+                    <h3 class="text-lg font-extrabold text-slate-800 tracking-wide">${stock.name}</h3>
                   </div>
-                  <h3 class="text-lg font-bold text-slate-900 mt-1">${s.name}</h3>
+                  <div class="text-right">
+                    <div class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">CP 分數</div>
+                    <div class="text-lg font-black text-emerald-600">${stock.cp_score}</div>
+                  </div>
                 </div>
-                <div class="text-right">
-                  <div class="text-xs text-slate-400">CP 分數</div>
-                  <div class="text-xl font-extrabold text-emerald-600 font-mono">${s.cp_score}</div>
+
+                <div class="h-px bg-slate-100 w-full mb-4"></div>
+
+                <!-- 數據四宮格 -->
+                <div class="grid grid-cols-2 gap-y-3 gap-x-2 text-sm mb-4">
+                  <div>
+                    <span class="text-slate-400 text-xs block">股價</span>
+                    <span class="font-bold text-slate-800 text-base">$${stock.price}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 text-xs block">本益比</span>
+                    <span class="font-bold text-slate-800">${stock.pe ? stock.pe + ' 倍' : 'N/A'}</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 text-xs block">殖利率</span>
+                    <span class="font-bold text-emerald-600">${stock.yield}%</span>
+                  </div>
+                  <div>
+                    <span class="text-slate-400 text-xs block">日成交額</span>
+                    <span class="font-bold text-slate-800">${Number(stock.turnover_m).toLocaleString()} 萬</span>
+                  </div>
                 </div>
               </div>
 
-              <div class="my-4 pt-3 border-t border-slate-100 grid grid-cols-2 gap-3 text-xs">
-                <div>
-                  <span class="text-slate-400">股價：</span>
-                  <span class="font-semibold text-slate-700 font-mono">$${s.price}</span>
-                </div>
-                <div>
-                  <span class="text-slate-400">本益比：</span>
-                  <span class="font-semibold text-slate-700 font-mono">${s.pe ? s.pe + ' 倍' : 'N/A'}</span>
-                </div>
-                <div>
-                  <span class="text-slate-400">殖利率：</span>
-                  <span class="font-semibold text-emerald-600 font-mono">${s.yield}%</span>
-                </div>
-                <div>
-                  <span class="text-slate-400">總市值：</span>
-                  <span class="font-semibold text-slate-700 font-mono">${s.market_cap} 億</span>
-                </div>
+              <!-- 底部 AI 評語區 -->
+              <div class="bg-slate-50 rounded-xl p-3 text-xs text-slate-600 border border-slate-100 mt-2">
+                <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i> ${stock.ai_comment}
               </div>
             </div>
+          `;
+          grid.innerHTML += cardHtml;
+        });
 
-            <div class="bg-slate-50 p-2.5 rounded-xl text-xs text-slate-500 mt-2">
-              💡 ${s.ai_comment}
-            </div>
-          </div>
-        `).join('');
-
-      } catch (err) {
-        console.error(err);
-        grid.innerHTML = `<div class="col-span-full py-16 text-center text-slate-400">資料讀取失敗，請確認數據檔案是否存在。</div>`;
+      } catch (error) {
+        console.error('讀取數據失敗:', error);
       }
     }
 
-    fetchStockData();
+    loadStockData();
   </script>
 </body>
 </html>
