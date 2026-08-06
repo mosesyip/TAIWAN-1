@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>台股雙模型監控台</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-stone-100 p-4 md:p-8 font-sans text-stone-800">
+  <div class="max-w-7xl mx-auto space-y-6">
+    
+    <!-- 頂部控制列 -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200">
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+        <div>
+          <h1 class="text-2xl font-bold tracking-tight mb-1">台股雙模型監控台</h1>
+          <p class="text-xs text-stone-400">● 系統狀態：正常運作中 · 每日自動掃描</p>
+        </div>
+        <div class="flex bg-stone-100 p-1 rounded-full w-fit">
+          <button class="px-4 py-1.5 rounded-full bg-white shadow-sm text-xs font-bold">日報</button>
+          <button class="px-4 py-1.5 rounded-full text-xs text-stone-500 font-medium">週報</button>
+          <button class="px-4 py-1.5 rounded-full text-xs text-stone-500 font-medium">月報</button>
+        </div>
+      </div>
+      <div class="flex gap-2">
+        <button class="px-5 py-2 rounded-full bg-stone-800 text-white font-medium text-sm">營運動能</button>
+        <button class="px-5 py-2 rounded-full bg-stone-200 text-stone-600 font-medium text-sm">防禦價值</button>
+      </div>
+    </div>
+
+    <!-- 數據表格區 -->
+    <div class="bg-white rounded-3xl p-6 shadow-sm border border-stone-200 overflow-x-auto">
+      <table class="w-full text-left text-sm min-w-[700px]">
+        <thead>
+          <tr class="text-stone-400 border-b border-stone-100 pb-3">
+            <th class="py-3 px-2 font-normal">#</th>
+            <th class="py-3 px-2 font-normal">Δ</th>
+            <th class="py-3 px-2 font-normal">代碼</th>
+            <th class="py-3 px-2 font-normal">公司</th>
+            <th class="py-3 px-2 font-normal">產業</th>
+            <th class="py-3 px-2 font-normal">分數組成</th>
+            <th class="py-3 px-2 font-bold text-stone-800">總分</th>
+            <th class="py-3 px-2 font-normal">收盤價</th>
+            <th class="py-3 px-2 font-normal">本益比</th>
+            <th class="py-3 px-2 font-normal">殖利率</th>
+          </tr>
+        </thead>
+        <tbody id="stock-table-body" class="divide-y divide-stone-100">
+          <tr>
+            <td colspan="10" class="py-8 text-center text-stone-400">載入數據中...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script>
+    fetch('./stocks.json')
+      .then(res => res.json())
+      .then(data => {
+        const tbody = document.getElementById('stock-table-body');
+        if (!data || data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="10" class="py-8 text-center text-stone-400">目前尚無篩選出符合條件的股票</td></tr>';
+          return;
+        }
+        tbody.innerHTML = data.map(item => `
+          <tr class="hover:bg-stone-50 transition-colors">
+            <td class="py-4 px-2 font-medium">${item.rank}</td>
+            <td class="py-4 px-2 font-bold text-emerald-600">${item.delta}</td>
+            <td class="py-4 px-2 font-bold text-blue-600">${item.code}</td>
+            <td class="py-4 px-2 font-bold">${item.name}</td>
+            <td class="py-4 px-2 text-stone-500">${item.industry}</td>
+            <td class="py-4 px-2">
+              <div class="w-24 h-2 rounded-full bg-stone-200 flex overflow-hidden">
+                <div class="bg-emerald-500" style="width: ${item.momentum}%"></div>
+                <div class="bg-blue-500" style="width: ${item.quality}%"></div>
+                <div class="bg-amber-500" style="width: ${item.val_flow}%"></div>
+              </div>
+            </td>
+            <td class="py-4 px-2 font-extrabold text-base">${item.total_score}</td>
+            <td class="py-4 px-2">${item.rev_3m}</td>
+            <td class="py-4 px-2">${item.profit_growth}</td>
+            <td class="py-4 px-2">${item.cash_conv}</td>
+          </tr>
+        `).join('');
+      })
+      .catch(err => {
+        document.getElementById('stock-table-body').innerHTML = 
+          '<tr><td colspan="10" class="py-8 text-center text-stone-400">尚未執行數據更新（或 stocks.json 建立中）</td></tr>';
+      });
+  </script>
+</body>
+</html>
