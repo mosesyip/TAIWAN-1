@@ -1,15 +1,10 @@
 import pandas as pd
 import yfinance as yf
-import requests
 import json
-import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def get_all_taiwan_stocks():
-    """抓取全台灣上市與上櫃的股票清單"""
     stocks = []
-    headers = {'User-Agent': 'Mozilla/5.0'}
-    
-    # 1. 上市股票清單
     try:
         url_twse = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=2"
         df_twse = pd.read_html(url_twse)[0]
@@ -21,10 +16,9 @@ def get_all_taiwan_stocks():
                 code, name = parts[0].strip(), parts[1].strip()
                 if len(code) == 4 and code.isdigit():
                     stocks.append({'symbol': f"{code}.TW", 'code': code, 'name': name, 'market': '上市'})
-    except Exception as e:
-        print(f"抓取上市清單失敗: {e}")
+    except Exception:
+        pass
 
-    # 2. 上櫃股票清單
     try:
         url_tpex = "https://isin.twse.com.tw/isin/C_public.jsp?strMode=4"
         df_tpex = pd.read_html(url_tpex)[0]
@@ -36,19 +30,12 @@ def get_all_taiwan_stocks():
                 code, name = parts[0].strip(), parts[1].strip()
                 if len(code) == 4 and code.isdigit():
                     stocks.append({'symbol': f"{code}.TWO", 'code': code, 'name': name, 'market': '上櫃'})
-    except Exception as e:
-        print(f"抓取上櫃清單失敗: {e}")
+    except Exception:
+        pass
 
     return stocks
 
-print("1. 開始取得全台股上市與上櫃股票清單...")
-all_stocks = get_all_taiwan_stocks()
-print(f"成功取得 {len(all_stocks)} 檔台灣股票，準備進行 4 大條件篩選...")
-
-filtered_results = []
-
-# 為了確保 GitHub Actions 執行速度，批量掃描全台股
-for idx, item in enumerate(all_stocks):
+def process_stock(item):
     symbol = item['symbol']
     code = item['code']
     name = item['name']
@@ -57,63 +44,92 @@ for idx, item in enumerate(all_stocks):
         ticker = yf.Ticker(symbol)
         info = ticker.info
         
-        # 抓取篩選所需欄位
         price = info.get('currentPrice') or info.get('regularMarketPrice') or 0
+        if price <= 0:
+            return None
+            
         pe = info.get('trailingPE', 0) or 0
         div_yield = info.get('dividendYield', 0) or 0
         div_yield_pct = div_yield * 100 if div_yield else 0.0
         market_cap = info.get('marketCap', 0) or 0
         
-        # 計算 20 日平均成交金額 (20日均量 * 股價)
-        avg_volume_20d = info.get('averageVolume10days') or info.get('averageVolume') or 0
-        avg_turnover_20d = avg_volume_20d * price
+        avg_vol = info.get('averageVolume10days') or info.get('averageVolume') or 0
+        avg_turnover = avg_vol * price
 
-        # -----------------------------------------------------
-        # 嚴格 4 大篩選條件判斷
-        # -----------------------------------------------------
-        # 1. 20日平均成交金額 >= 30,000,000 TWD (3000萬)
-        cond1 = avg_turnover_20d >= 30000000
-        
-        # 2. 本益比 (P/E) < 18 且 > 0
-        cond2 = 0 < pe < 18
-        
-        # 3. 現金殖利率 >= 4.5%
-        cond3 = div_yield_pct >= 4.5
-        
-        # 4. 總市值 < 200,000,000,000 TWD (2000億)
-        cond4 = market_cap < 200000000000
+        # 4 大條件判斷
+        c1 = avg_turnover >= 30000000        # 成交金額 > 3000萬
+        c2 = 0 < pe < 18                     # 本益比 < 18
+        c3 = div_yield_pct >= 4.5            # 殖利率 >= 4.5%
+        c4 = market_cap < 200000000000       # 市值 < 2000億
 
-        # 通過所有 4 個門檻才加入最終清單
-        if cond1 and cond2 and cond3 and cond4:
-            # 製作好理解的標籤
-            tags = ["💰 高配息", "🏷️ 價格甜甜", "🔥 交易熱絡"]
-            
-            # 計算綜合分數
-            score = round(70 + (div_yield_pct * 3) + ((18 - pe) * 1.5), 1)
-            score = min(score, 99.0)
+        passed_count = sum([c1, c2, c3, c4])
 
-            filtered_results.append({
+        # 至少要符合 3 個條件才進入候選池
+        if passed_count >= 3:
+            # AI 綜合 CP 值計算公式 (滿分約 100 分)
+            yield_score = div_yield_pct * 9                          # 殖利率越高分數越高
+            pe_score = max(0, (18 - pe) * 2.5) if pe > 0 else 0       # 本益比越低越便宜分數越高
+            liquidity_score = min(15, (avg_turnover / 10000000))     # 流動性加分
+            total_score = round(yield_score + pe_score + liquidity_score, 1)
+
+            tags = []
+            if c1: tags.append("🔥 熱門易買賣")
+            if c2: tags.append("🏷️ 價格甜甜")
+            if c3: tags.append("💰 高配息")
+            if c4: tags.append("🌱 中小型股")
+
+            missing_note = ""
+            if not c1: missing_note = "成交量稍低"
+            elif not c2: missing_note = "價格略貴"
+            elif not c3: missing_note = "配息稍低"
+            elif not c4: missing_note = "大型權值股"
+
+            return {
                 "code": code,
                 "name": name,
                 "market": item['market'],
                 "price": f"${round(price, 1)}",
-                "pe": f"{round(pe, 1)} 倍",
+                "pe": f"{round(pe, 1)} 倍" if pe > 0 else "N/A",
                 "yield": f"{round(div_yield_pct, 2)}%",
-                "turnover": f"{round(avg_turnover_20d / 1000000, 1)} 百萬",
-                "market_cap": f"{round(market_cap / 100000000, 1)} 億",
-                "score": score,
+                "turnover": f"{round(avg_turnover / 1000000, 1)} 百萬",
+                "passed_count": passed_count,
+                "score": total_score,
+                "is_full_match": passed_count == 4,
+                "missing_note": missing_note,
                 "tags": tags
-            })
-            print(f"  [符合標的] {code} {name} - 殖利率:{round(div_yield_pct,2)}%, 本益比:{round(pe,1)}")
-
+            }
     except Exception:
-        continue
+        pass
+    return None
 
-# 依綜合推薦分數從高到低排序
-filtered_results.sort(key=lambda x: x['score'], reverse=True)
+if __name__ == '__main__':
+    all_stocks = get_all_taiwan_stocks()
+    candidates = []
+    
+    with ThreadPoolExecutor(max_workers=10) as executor:
+        futures = [executor.submit(process_stock, item) for item in all_stocks]
+        for future in as_completed(futures):
+            res = future.result()
+            if res:
+                candidates.append(res)
 
-print(f"\n全市場掃描完成！共篩選出 {len(filtered_results)} 檔符合條件的優質標的。")
+    # 排序邏輯：符合條件數多者優先(4>3)，同條件數者依 AI 分數由高到低排序
+    candidates.sort(key=lambda x: (x['passed_count'], x['score']), reverse=True)
 
-# 寫入 stocks.json 供前端讀取
-with open('stocks.json', 'w', encoding='utf-8') as f:
-    json.dump(filtered_results, f, ensure_ascii=False, indent=2)
+    # 取前 20 名
+    top_20 = candidates[:20]
+
+    # 給予名次與 AI 評價評語
+    for rank, stock in enumerate(top_20, 1):
+        stock['rank'] = rank
+        if stock['is_full_match']:
+            stock['ai_comment'] = "🎯 完美高分：4項指標完全過關"
+        else:
+            stock['ai_comment'] = f"👀 綜合高分：僅差在「{stock['missing_note']}」"
+
+    output_data = {
+        "top_20": top_20
+    }
+
+    with open('stocks.json', 'w', encoding='utf-8') as f:
+        json.dump(output_data, f, ensure_ascii=False, indent=2)
