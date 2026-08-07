@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全台股 AI 防禦量化嚴選 TOP 20 排行榜</title>
+    <title>全台股 AI 防禦量化監控台</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -12,38 +12,36 @@
 
     <div class="max-w-7xl mx-auto space-y-5">
 
-        <!-- 頁頭頂部 -->
+        <!-- 頁頭頂部與數據新鮮度驗證標籤 -->
         <header class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-stone-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> 全台股 AI 防禦量化嚴選 TOP 20
+                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> 全台股 AI 量化嚴選監控台
                 </h1>
-                <p class="text-stone-500 text-xs md:text-sm mt-1">以法人級防禦風控為核心，每日自動掃描全台股高流動性與優質估值標的</p>
+                <p class="text-stone-500 text-xs md:text-sm mt-1">100% 官方第一手 OpenAPI 數據：每日自動掃描全台股高流動性與優質估值標的</p>
             </div>
-            <div id="update-badge" class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-2 shrink-0">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span id="update-time">載入中...</span>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                <a href="https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL" target="_blank" rel="noopener noreferrer" class="text-[11px] bg-stone-100 hover:bg-stone-200 text-stone-600 px-2.5 py-1 rounded-md border border-stone-200 transition">
+                    <i class="fa-solid fa-link text-[10px] mr-1"></i>官方 OpenAPI 驗證
+                </a>
+                <div id="update-badge" class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-2 shrink-0">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <span id="update-time">載入中...</span>
+                </div>
             </div>
         </header>
 
-        <!-- 小白選股四大安全指標說明 -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
-                <p class="text-[11px] text-stone-400 font-medium">1. 流動性安全</p>
-                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">成交額 ≥ 5,000 萬</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
-                <p class="text-[11px] text-stone-400 font-medium">2. 價格不買貴</p>
-                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">本益比 5 ~ 15 倍</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
-                <p class="text-[11px] text-stone-400 font-medium">3. 領息超穩健</p>
-                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">殖利率 4% ~ 8%</p>
-            </div>
-            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
-                <p class="text-[11px] text-stone-400 font-medium">4. 產業與個股</p>
-                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">包含產業分類與 Yahoo 連結</p>
-            </div>
+        <!-- 模組頁籤切換 (總覽 / 防禦 / 動能) -->
+        <div class="bg-white rounded-xl p-2 border border-stone-200/80 shadow-sm flex flex-wrap gap-2">
+            <button id="btn-overall" onclick="switchTab('overall')" class="px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-slate-900 text-white shadow-sm flex items-center gap-2">
+                <i class="fa-solid fa-layer-group"></i> 攻守兼備 (總覽)
+            </button>
+            <button id="btn-defense" onclick="switchTab('defense')" class="px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2">
+                <i class="fa-solid fa-shield"></i> 防禦價值榜
+            </button>
+            <button id="btn-momentum" onclick="switchTab('momentum')" class="px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2">
+                <i class="fa-solid fa-bolt"></i> 營運動能 / 熱度榜
+            </button>
         </div>
 
         <!-- 排名比較基準提示列 (截圖風格) -->
@@ -59,7 +57,7 @@
         <div class="bg-white rounded-xl p-3.5 shadow-sm border border-stone-200/80 flex flex-col sm:flex-row justify-between items-center gap-3">
             <div class="flex items-center gap-2 text-slate-800 font-bold text-base w-full sm:w-auto">
                 <i class="fa-solid fa-trophy text-amber-500"></i>
-                <span>防禦量化排行榜</span>
+                <span id="current-tab-title">防禦量化排行榜 (攻守兼備)</span>
             </div>
             <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto">
                 <div class="relative w-full sm:w-56">
@@ -68,7 +66,7 @@
                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <select id="sort-select" class="w-full sm:w-auto px-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-600 font-medium">
-                    <option value="cp">依 CP 防禦總分排序</option>
+                    <option value="score">依 模組分數 高到低</option>
                     <option value="yield">依 殖利率 高到低</option>
                     <option value="pe">依 本益比 低到高</option>
                     <option value="turnover">依 成交金額 高到低</option>
@@ -87,13 +85,13 @@
                             <th class="py-3.5 px-3 w-20">代碼</th>
                             <th class="py-3.5 px-4 w-28">公司</th>
                             <th class="py-3.5 px-4 w-32">產業</th>
-                            <th class="py-3.5 px-4 w-28 text-right">CP 防禦分數</th>
+                            <th class="py-3.5 px-4 w-28 text-right">模型總分</th>
                             <th class="py-3.5 px-4">主要數據 (股價 / PE / 殖利率 / 成交額)</th>
                             <th class="py-3.5 px-4 w-56">智慧風控評語</th>
                         </tr>
                     </thead>
                     <tbody id="stock-table-body" class="divide-y divide-stone-100 text-xs text-slate-700 font-medium">
-                        <!-- 動態由 JavaScript 載入 -->
+                        <!-- 動態載入 -->
                     </tbody>
                 </table>
             </div>
@@ -102,25 +100,57 @@
     </div>
 
     <script>
-        let globalStocksData = [];
+        let allData = {};
+        let currentTab = 'overall';
 
         async function loadStockData() {
             try {
                 const response = await fetch(`data.json?v=${Date.now()}`);
-                const data = await response.json();
+                allData = await response.json();
                 
-                document.getElementById('update-time').innerText = `更新時間：${data.update_time}`;
+                document.getElementById('update-time').innerText = `更新時間：${allData.update_time}`;
                 
-                const mDate = data.market_date || '2026-08-06';
-                const rDate = data.report_date || '2026-08-07';
+                const mDate = allData.market_date || '2026-08-06';
+                const rDate = allData.report_date || '2026-08-07';
                 document.getElementById('baseline-info').innerText = `排名變化比較基準：市場資料 ${mDate}（報表日 ${rDate}）。`;
 
-                globalStocksData = data.stocks || [];
-                renderTable(globalStocksData);
+                renderCurrentTab();
             } catch (error) {
                 console.error("無法載入資料:", error);
                 document.getElementById('update-time').innerText = "資料載入失敗";
             }
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // 按鈕視覺切換
+            ['overall', 'defense', 'momentum'].forEach(t => {
+                const btn = document.getElementById(`btn-${t}`);
+                if (t === tab) {
+                    btn.className = "px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-slate-900 text-white shadow-sm flex items-center gap-2";
+                } else {
+                    btn.className = "px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2";
+                }
+            });
+
+            const titles = {
+                'overall': '防禦量化排行榜 (攻守兼備總覽)',
+                'defense': '防禦量化排行榜 (高殖利率與低估值)',
+                'momentum': '防禦量化排行榜 (市場熱度與營運動能)'
+            };
+            document.getElementById('current-tab-title').innerText = titles[tab];
+
+            renderCurrentTab();
+        }
+
+        function renderCurrentTab() {
+            let listKey = 'stocks_overall';
+            if (currentTab === 'defense') listKey = 'stocks_defense';
+            else if (currentTab === 'momentum') listKey = 'stocks_momentum';
+
+            const stocks = allData[listKey] || [];
+            renderTable(stocks);
         }
 
         function renderTable(stocks) {
@@ -133,13 +163,11 @@
             }
 
             stocks.forEach((stock) => {
-                // 名次 Badge
                 let rankBadge = `<span class="text-stone-500 font-bold">${stock.rank}</span>`;
                 if (stock.rank === 1) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-amber-500 text-white rounded-full font-extrabold text-xs shadow-sm">1</span>`;
                 else if (stock.rank === 2) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-slate-400 text-white rounded-full font-extrabold text-xs shadow-sm">2</span>`;
                 else if (stock.rank === 3) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-amber-700 text-white rounded-full font-extrabold text-xs shadow-sm">3</span>`;
 
-                // Δ 排名變動 (↑2, ↓1, —)
                 let deltaHtml = `<span class="text-stone-400 font-medium">—</span>`;
                 const delta = stock.rank_delta || 0;
                 if (delta > 0) {
@@ -150,40 +178,19 @@
 
                 const rowHtml = `
                     <tr class="hover:bg-amber-50/30 transition duration-150">
-                        <!-- # 排名 -->
-                        <td class="py-3.5 px-4 text-center">
-                            ${rankBadge}
-                        </td>
-
-                        <!-- Δ 名次變動 -->
-                        <td class="py-3.5 px-3 text-center">
-                            ${deltaHtml}
-                        </td>
-
-                        <!-- 代碼 (超連結) -->
+                        <td class="py-3.5 px-4 text-center">${rankBadge}</td>
+                        <td class="py-3.5 px-3 text-center">${deltaHtml}</td>
                         <td class="py-3.5 px-3">
                             <a href="${stock.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold hover:underline flex items-center gap-1 group">
                                 ${stock.code}
                                 <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-blue-400 group-hover:text-blue-600"></i>
                             </a>
                         </td>
-
-                        <!-- 公司名稱 -->
-                        <td class="py-3.5 px-4 font-bold text-slate-900 text-sm">
-                            ${stock.name}
-                        </td>
-
-                        <!-- 產業別 -->
-                        <td class="py-3.5 px-4 text-stone-500">
-                            ${stock.category}
-                        </td>
-
-                        <!-- CP 防禦總分 -->
+                        <td class="py-3.5 px-4 font-bold text-slate-900 text-sm">${stock.name}</td>
+                        <td class="py-3.5 px-4 text-stone-500">${stock.category}</td>
                         <td class="py-3.5 px-4 text-right">
-                            <span class="text-sm font-extrabold text-emerald-600">${stock.cp_score}</span>
+                            <span class="text-sm font-extrabold text-emerald-600">${stock.active_score}</span>
                         </td>
-
-                        <!-- 主要數據區塊 -->
                         <td class="py-3.5 px-4">
                             <div class="flex items-center gap-4 text-[11px]">
                                 <div><span class="text-stone-400">股價：</span><span class="font-bold text-slate-800">$${stock.price}</span></div>
@@ -192,8 +199,6 @@
                                 <div><span class="text-stone-400">成交：</span><span class="font-bold text-slate-800">${stock.turnover_formatted}</span></div>
                             </div>
                         </td>
-
-                        <!-- 智慧風控評語 -->
                         <td class="py-3.5 px-4">
                             <span class="bg-amber-50/80 text-amber-900/80 border border-amber-200/60 px-2 py-1 rounded text-[11px] inline-block">
                                 ${stock.highlight}
@@ -205,10 +210,12 @@
             });
         }
 
-        // 搜尋過濾機制
+        // 搜尋機制
         document.getElementById('search-input').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
-            const filtered = globalStocksData.filter(s => 
+            let listKey = currentTab === 'overall' ? 'stocks_overall' : (currentTab === 'defense' ? 'stocks_defense' : 'stocks_momentum');
+            const stocks = allData[listKey] || [];
+            const filtered = stocks.filter(s => 
                 s.code.toLowerCase().includes(query) || 
                 s.name.toLowerCase().includes(query) ||
                 s.category.toLowerCase().includes(query)
@@ -219,9 +226,10 @@
         // 排序機制
         document.getElementById('sort-select').addEventListener('change', (e) => {
             const sortBy = e.target.value;
-            let sorted = [...globalStocksData];
+            let listKey = currentTab === 'overall' ? 'stocks_overall' : (currentTab === 'defense' ? 'stocks_defense' : 'stocks_momentum');
+            let sorted = [...(allData[listKey] || [])];
 
-            if (sortBy === 'cp') sorted.sort((a, b) => b.cp_score - a.cp_score);
+            if (sortBy === 'score') sorted.sort((a, b) => b.active_score - a.active_score);
             else if (sortBy === 'yield') sorted.sort((a, b) => b.yield_rate - a.yield_rate);
             else if (sortBy === 'pe') sorted.sort((a, b) => a.pe - b.pe);
             else if (sortBy === 'turnover') sorted.sort((a, b) => b.turnover_wan - a.turnover_wan);
