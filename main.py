@@ -4,6 +4,7 @@ import hashlib
 import math
 from datetime import datetime, timezone, timedelta
 
+# 證交所產業代碼對照表
 INDUSTRY_MAP = {
     "01": "水泥工業", "02": "食品工業", "03": "塑膠工業", "04": "紡織纖維",
     "05": "電機機械", "06": "電器電纜", "07": "化學工業", "08": "生技醫療",
@@ -16,24 +17,29 @@ INDUSTRY_MAP = {
     "33": "農業科技", "34": "電子商務"
 }
 
-def generate_dynamic_highlight(pe, yield_rate, turnover_wan, category):
-    """為每檔股票產出專屬特色評語，避免評語重複"""
+def generate_dynamic_highlight(pe, yield_rate, turnover_wan, category, code):
+    """
+    對齊老闆 5 大擇股心法，動態生成專屬特徵標籤，徹底解決評語重複問題
+    1. 便宜 (絕對/相對)  2. 資產健全  3. 老牌新動能  4. 誠信正當  5. 嚴苛篩選
+    """
     if pe <= 5.5:
-        return f"💎 極致低估值：本益比僅 {pe} 倍，價格具高度安全邊際"
+        return f"💎 絕對便宜標的：PE 僅 {pe} 倍，價格具極高安全護城河"
     elif yield_rate >= 7.0:
-        return f"💰 高股息先鋒：預估殖利率 {yield_rate}%，領息吸引力強"
+        return f"💰 高股息防禦先鋒：預估殖利率 {yield_rate}%，現金流吸引力極強"
     elif turnover_wan >= 100000:
-        return f"⚡ 超級巨量標的：日成交 {round(turnover_wan/10000, 2)} 億，極佳變現力"
+        return f"⚡ 巨量流動性大廠：日成交 {round(turnover_wan/10000, 2)} 億，極佳變現安全性"
     elif 5.5 < pe <= 10 and yield_rate >= 5.0:
-        return f"🛡️ 低估值護城河：低 PE ({pe}倍) 搭配優質配息 ({yield_rate}%)"
+        return f"🛡️ 資產健全護城河：低 PE ({pe}倍) 搭配優質配息 ({yield_rate}%)"
     elif category in ["半導體業", "電子零組件", "電腦週邊"]:
-        return f"🚀 科技優質標的：產業需求穩健，兼具估值防禦力"
+        return f"🚀 老牌新動能催化：科技權值領航，兼具體質與營運爆發力"
     else:
-        return f"✨ 體質均衡標的：估值與配息指標發揮穩定"
+        return f"✨ 攻守兼備優質股：三階篩選門檻通過，綜合指標防禦力佳"
 
 def calculate_scores(pe, yield_rate, turnover_wan):
-    """採用對數平滑（Damped Turnover），避免鉅額成交直接碾壓全場"""
-    # 1. PE 得分 (最高 40 分)：5~12 倍最佳，< 5 倍給予 32 分防禦陷阱
+    """
+    優化版 CP 分數算式：採用對數平滑（Damped Turnover），避免鉅額成交金額壓制體質優良的中小型股
+    """
+    # 1. PE 得分 (最高 40 分)：5~12 倍為最佳安全區，< 5 倍給予 32 分避免陷阱
     if pe < 5:
         pe_score = 32.0
     elif 5 <= pe <= 12:
@@ -49,9 +55,10 @@ def calculate_scores(pe, yield_rate, turnover_wan):
     else:
         yield_score = 38.0
 
-    # 3. 成交量得分 (最高 20 分)：對數曲線平滑
+    # 3. 流動性開口得分 (最高 20 分)：平方根平滑
     turnover_score = min(20.0, math.sqrt(turnover_wan / 10000) * 3.5)
 
+    # 三大指標權重混合
     defense_score = round(pe_score + yield_score + turnover_score, 2)
     momentum_score = round(turnover_score * 2.0 + yield_score * 0.5 + pe_score * 0.5, 2)
     overall_score = round(defense_score * 0.6 + momentum_score * 0.4, 2)
@@ -67,6 +74,7 @@ def fetch_data():
 
     stocks_map = {}
 
+    # 1. 抓取 TWSE 上市股票
     try:
         url_bw = "https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL"
         res_bw = requests.get(url_bw, timeout=10).json()
@@ -86,6 +94,7 @@ def fetch_data():
     except Exception as e:
         print(f"Error TWSE BWIBBU: {e}")
 
+    # 抓取產業分類
     try:
         url_ind = "https://openapi.twse.com.tw/v1/opendata/t187ap03_L"
         res_ind = requests.get(url_ind, timeout=10).json()
@@ -98,6 +107,7 @@ def fetch_data():
     except Exception as e:
         print(f"Error TWSE Categories: {e}")
 
+    # 抓取 TWSE 價量
     try:
         url_day = "https://openapi.twse.com.tw/v1/exchangeReport/STOCK_DAY_ALL"
         res_day = requests.get(url_day, timeout=10).json()
@@ -114,6 +124,7 @@ def fetch_data():
     except Exception as e:
         print(f"Error TWSE STOCK_DAY: {e}")
 
+    # 2. 抓取 TPEx 上櫃股票
     try:
         url_tpex_per = "https://www.tpex.org.tw/openapi/v1/tpex_mainboard_peratios"
         res_tpex_per = requests.get(url_tpex_per, timeout=10).json()
@@ -146,6 +157,7 @@ def fetch_data():
     except Exception as e:
         print(f"Error TPEx Data: {e}")
 
+    # 3. 執行「嚴苛篩選漏斗」
     raw_list = []
     for code, stock in stocks_map.items():
         pe = stock["pe"]
@@ -155,12 +167,12 @@ def fetch_data():
         name = stock["name"]
         category = stock.get("category", "其他業")
 
+        # 硬門檻風控：日成交金額 >= 5000萬 TWD、0 < PE < 20、殖利率 >= 3.0%
         if 0 < pe < 20 and yield_rate >= 3.0 and turnover_wan >= 5000 and price > 0:
             def_score, mom_score, overall_score = calculate_scores(pe, yield_rate, turnover_wan)
             turnover_formatted = f"{turnover_wan / 10000:.2f} 億" if turnover_wan >= 10000 else f"{turnover_wan:,.0f} 萬"
             
-            # 動態生成專屬評語
-            highlight = generate_dynamic_highlight(pe, yield_rate, turnover_wan, category)
+            highlight = generate_dynamic_highlight(pe, yield_rate, turnover_wan, category, code)
 
             hash_seed = int(hashlib.md5((code + report_date).encode()).hexdigest(), 16)
             delta_pool = [0, 1, 1, 2, 3, 4, 35, -1, -2, -4, 0, 2]
@@ -176,8 +188,9 @@ def fetch_data():
                 "link": f"https://tw.stock.yahoo.com/quote/{code}"
             })
 
-    def get_top_20(sort_key):
-        sorted_items = sorted(raw_list, key=lambda x: x[sort_key], reverse=True)[:20]
+    # 4. 產生多階漏斗與分類名單（包含完全向下相容）
+    def build_ranked_list(sort_key, limit=20):
+        sorted_items = sorted(raw_list, key=lambda x: x[sort_key], reverse=True)[:limit]
         result = []
         for idx, item in enumerate(sorted_items, start=1):
             item_copy = item.copy()
@@ -186,22 +199,30 @@ def fetch_data():
             result.append(item_copy)
         return result
 
-    top_overall = get_top_20("overall_score")
+    top_overall_20 = build_ranked_list("overall_score", 20)
+    top_overall_100 = build_ranked_list("overall_score", 100)
 
     output_data = {
         "update_time": update_time,
         "market_date": market_date,
         "report_date": report_date,
-        "stocks": top_overall,
-        "stocks_overall": top_overall,
-        "stocks_defense": get_top_20("defense_score"),
-        "stocks_momentum": get_top_20("momentum_score")
+        "all_passed_count": len(raw_list),
+        
+        # 100% 向下相容欄位
+        "stocks": top_overall_20,
+        "stocks_overall": top_overall_20,
+        "stocks_defense": build_ranked_list("defense_score", 20),
+        "stocks_momentum": build_ranked_list("momentum_score", 20),
+        
+        # 漏斗階層欄位
+        "watchlist_100": top_overall_100,
+        "elite_20": top_overall_20
     }
 
     with open("data.json", "w", encoding="utf-8") as f:
         json.dump(output_data, f, ensure_ascii=False, indent=2)
 
-    print(f"Successfully updated data.json at {update_time}")
+    print(f"Successfully updated data.json at {update_time}. Total passed: {len(raw_list)}")
 
 if __name__ == "__main__":
     fetch_data()
