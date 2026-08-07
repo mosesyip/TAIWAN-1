@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全台股 AI 量化嚴選 TOP 20</title>
+    <title>全台股 AI 防禦量化嚴選 TOP 20</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -16,9 +16,9 @@
         <header class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid font-bold fa-chart-line text-emerald-500"></i> 全台股 AI 量化嚴選 TOP 20
+                    <i class="fa-solid fa-shield-halved text-emerald-500"></i> 全台股 AI 防禦量化嚴選 TOP 20
                 </h1>
-                <p class="text-slate-500 text-sm mt-1">每日自動掃描上市櫃股票，依據本益比、殖利率與成交量綜合嚴選</p>
+                <p class="text-slate-500 text-sm mt-1">以法人級防禦風控為核心，每日自動掃描全台股高流動性與優質估值標的</p>
             </div>
             <div id="update-badge" class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-2">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -26,42 +26,46 @@
             </div>
         </header>
 
-        <!-- 篩選指標說明區塊 -->
+        <!-- 小白選股四大安全指標說明 -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">1. 流動性高</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">日成交額 ≥ 1,500 萬</p>
+                <p class="text-xs text-slate-400 font-medium">1. 流動性安全</p>
+                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">成交額 ≥ 5,000 萬</p>
+                <p class="text-[11px] text-slate-400 mt-1">好買好賣不套牢</p>
             </div>
             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">2. 價格不貴</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">本益比 < 20 倍</p>
+                <p class="text-xs text-slate-400 font-medium">2. 價格不買貴</p>
+                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">本益比 5 ~ 15 倍</p>
+                <p class="text-[11px] text-slate-400 mt-1">合理年數回收成本</p>
             </div>
             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">3. 高年領利息</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">現金殖利率 ≥ 2.5%</p>
+                <p class="text-xs text-slate-400 font-medium">3. 領息超穩健</p>
+                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">殖利率 4% ~ 8%</p>
+                <p class="text-[11px] text-slate-400 mt-1">避免高利息陷阱</p>
             </div>
             <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">4. 潛力股池</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">全市場動態計算 CP 值</p>
+                <p class="text-xs text-slate-400 font-medium">4. 產業與個股</p>
+                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">包含產業標籤</p>
+                <p class="text-[11px] text-slate-400 mt-1">點卡片直達 Yahoo 股市</p>
             </div>
         </div>
 
-        <!-- 搜尋與動態排序控制區 -->
+        <!-- 控制區：搜尋、排序與產業過濾 -->
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2 text-slate-800 font-bold text-lg w-full sm:w-auto">
                 <i class="fa-solid fa-trophy text-amber-500"></i>
-                <span>今日精選榜單</span>
+                <span>防禦嚴選榜單</span>
             </div>
             <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto">
                 <!-- 搜尋框 -->
                 <div class="relative w-full sm:w-48">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" id="search-input" placeholder="搜尋代號或股票名稱..." 
+                    <input type="text" id="search-input" placeholder="搜尋代號/股名/產業..." 
                            class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
                 <!-- 排序選單 -->
                 <select id="sort-select" class="w-full sm:w-auto px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-600 font-medium">
-                    <option value="cp">依 CP 分數排序</option>
+                    <option value="cp">依 CP 防禦總分排序</option>
                     <option value="yield">依 殖利率 高到低</option>
                     <option value="pe">依 本益比 低到高</option>
                     <option value="turnover">依 成交金額 高到低</option>
@@ -69,7 +73,7 @@
             </div>
         </div>
 
-        <!-- 股票卡片網格 Container -->
+        <!-- 股票卡片 Container -->
         <div id="stock-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
             <!-- 動態由 JavaScript 載入 -->
         </div>
@@ -81,7 +85,6 @@
 
         async function loadStockData() {
             try {
-                // 防快取 Timestamp 參數
                 const response = await fetch(`data.json?v=${Date.now()}`);
                 const data = await response.json();
                 
@@ -99,12 +102,11 @@
             container.innerHTML = '';
 
             if (stocks.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">沒有符合搜尋條件的股票</div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">沒有符合條件的股票</div>`;
                 return;
             }
 
-            stocks.forEach((stock, idx) => {
-                // 排名 Badge 顏色樣式
+            stocks.forEach((stock) => {
                 let rankBadgeStyle = "bg-slate-100 text-slate-600";
                 if (stock.rank === 1) rankBadgeStyle = "bg-amber-500 text-white font-extrabold";
                 else if (stock.rank === 2) rankBadgeStyle = "bg-slate-400 text-white font-extrabold";
@@ -112,46 +114,51 @@
 
                 const cardHtml = `
                     <a href="${stock.link}" target="_blank" rel="noopener noreferrer" 
-                       class="block bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-emerald-200 transition duration-200 group">
+                       class="block bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-emerald-200 transition duration-200 group relative">
                         
-                        <!-- 卡片頂部：排名、代號名稱與 CP 分數 -->
-                        <div class="flex justify-between items-start mb-4">
-                            <div class="flex items-center gap-2">
-                                <span class="px-2.5 py-1 rounded-md text-xs ${rankBadgeStyle}">#${stock.rank}</span>
-                                <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-1 rounded">${stock.code}</span>
+                        <!-- 排名、代號名稱、產業標籤與 CP 防禦分數 -->
+                        <div class="flex justify-between items-start mb-3">
+                            <div class="space-y-1.5">
+                                <div class="flex items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-md text-xs ${rankBadgeStyle}">#${stock.rank}</span>
+                                    <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${stock.code}</span>
+                                    <span class="text-[11px] bg-emerald-50 text-emerald-700 font-medium px-2 py-0.5 rounded-md border border-emerald-100">
+                                        ${stock.category}
+                                    </span>
+                                </div>
                                 <h3 class="text-lg font-bold text-slate-800 group-hover:text-emerald-600 transition flex items-center gap-1">
                                     ${stock.name}
                                     <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-emerald-500"></i>
                                 </h3>
                             </div>
                             <div class="text-right">
-                                <span class="text-[10px] font-bold text-slate-400 block">CP 分數</span>
+                                <span class="text-[10px] font-bold text-slate-400 block">防禦總分</span>
                                 <span class="text-xl font-extrabold text-emerald-600">${stock.cp_score}</span>
                             </div>
                         </div>
 
-                        <!-- 主要四大數據區塊 -->
-                        <div class="grid grid-cols-2 gap-3 bg-slate-50/70 rounded-xl p-3 text-xs mb-3">
+                        <!-- 主要四大數據區塊（小白白話標示） -->
+                        <div class="grid grid-cols-2 gap-3 bg-slate-50/80 rounded-xl p-3 text-xs mb-3">
                             <div>
                                 <span class="text-slate-400 block mb-0.5">股價</span>
                                 <span class="font-bold text-slate-800 text-sm">$${stock.price}</span>
                             </div>
                             <div>
-                                <span class="text-slate-400 block mb-0.5">本益比</span>
+                                <span class="text-slate-400 block mb-0.5">本益比 (回本年數)</span>
                                 <span class="font-bold text-slate-800 text-sm">${stock.pe} 倍</span>
                             </div>
                             <div>
-                                <span class="text-slate-400 block mb-0.5">殖利率</span>
+                                <span class="text-slate-400 block mb-0.5">殖利率 (預估年息)</span>
                                 <span class="font-bold text-emerald-600 text-sm">${stock.yield_rate}%</span>
                             </div>
                             <div>
-                                <span class="text-slate-400 block mb-0.5">日成交額</span>
+                                <span class="text-slate-400 block mb-0.5">日成交額 (流動性)</span>
                                 <span class="font-bold text-slate-800 text-sm">${stock.turnover_formatted}</span>
                             </div>
                         </div>
 
-                        <!-- 底部 AI 智慧評語標籤 -->
-                        <div class="bg-amber-50/60 border border-amber-100/80 rounded-lg p-2.5 text-xs text-amber-900/80 flex items-center gap-2">
+                        <!-- 底部 AI 智慧風控評語標籤 -->
+                        <div class="bg-amber-50/70 border border-amber-100/80 rounded-lg p-2.5 text-xs text-amber-900/80 flex items-center gap-2">
                             <span>${stock.highlight}</span>
                         </div>
                     </a>
@@ -160,12 +167,13 @@
             });
         }
 
-        // 搜尋過濾機制
+        // 搜尋過濾機制 (支援代號/名稱/產業搜尋)
         document.getElementById('search-input').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             const filtered = globalStocksData.filter(s => 
                 s.code.toLowerCase().includes(query) || 
-                s.name.toLowerCase().includes(query)
+                s.name.toLowerCase().includes(query) ||
+                s.category.toLowerCase().includes(query)
             );
             renderCards(filtered);
         });
@@ -183,7 +191,6 @@
             renderCards(sorted);
         });
 
-        // 頁面載入執行
         loadStockData();
     </script>
 </body>
