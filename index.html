@@ -3,77 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全台股 AI 防禦量化嚴選 TOP 20</title>
+    <title>全台股 AI 防禦量化嚴選 TOP 20 排行榜</title>
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 text-slate-800 font-sans min-h-screen p-4 md:p-8">
+<body class="bg-[#fcfbf9] text-slate-800 font-sans min-h-screen p-3 md:p-8">
 
-    <div class="max-w-7xl mx-auto space-y-6">
+    <div class="max-w-7xl mx-auto space-y-5">
 
         <!-- 頁頭頂部 -->
-        <header class="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <header class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-stone-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div>
                 <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-emerald-500"></i> 全台股 AI 防禦量化嚴選 TOP 20
+                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> 全台股 AI 防禦量化嚴選 TOP 20
                 </h1>
-                <p class="text-slate-500 text-sm mt-1">以法人級防禦風控為核心，每日自動掃描全台股高流動性與優質估值標的</p>
+                <p class="text-stone-500 text-xs md:text-sm mt-1">以法人級防禦風控為核心，每日自動掃描全台股高流動性與優質估值標的</p>
             </div>
-            <div id="update-badge" class="bg-emerald-50 text-emerald-700 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-2">
+            <div id="update-badge" class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-2 shrink-0">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span id="update-time">載入中...</span>
             </div>
         </header>
 
         <!-- 小白選股四大安全指標說明 -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">1. 流動性安全</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">成交額 ≥ 5,000 萬</p>
-                <p class="text-[11px] text-slate-400 mt-1">好買好賣不套牢</p>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
+                <p class="text-[11px] text-stone-400 font-medium">1. 流動性安全</p>
+                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">成交額 ≥ 5,000 萬</p>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">2. 價格不買貴</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">本益比 5 ~ 15 倍</p>
-                <p class="text-[11px] text-slate-400 mt-1">合理年數回收成本</p>
+            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
+                <p class="text-[11px] text-stone-400 font-medium">2. 價格不買貴</p>
+                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">本益比 5 ~ 15 倍</p>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">3. 領息超穩健</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">殖利率 4% ~ 8%</p>
-                <p class="text-[11px] text-slate-400 mt-1">避免高利息陷阱</p>
+            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
+                <p class="text-[11px] text-stone-400 font-medium">3. 領息超穩健</p>
+                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">殖利率 4% ~ 8%</p>
             </div>
-            <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
-                <p class="text-xs text-slate-400 font-medium">4. 產業與個股</p>
-                <p class="text-sm md:text-base font-bold text-slate-700 mt-1">包含產業標籤</p>
-                <p class="text-[11px] text-slate-400 mt-1">點卡片直達 Yahoo 股市</p>
+            <div class="bg-white p-3.5 rounded-xl border border-stone-200/80 shadow-sm">
+                <p class="text-[11px] text-stone-400 font-medium">4. 產業與個股</p>
+                <p class="text-xs md:text-sm font-bold text-slate-800 mt-0.5">包含產業分類與 Yahoo 連結</p>
             </div>
         </div>
 
-        <!-- 比較基準資訊橫條 -->
-        <div class="bg-amber-50/60 border border-amber-100 rounded-xl px-4 py-2.5 text-xs text-amber-900/80 flex items-center justify-between shadow-sm">
-            <div class="flex items-center gap-2">
-                <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+        <!-- 排名比較基準提示列 (截圖風格) -->
+        <div class="bg-[#f7f2ea] border border-[#ebdccb] rounded-xl px-4 py-2.5 text-xs text-[#735638] flex flex-col sm:flex-row sm:items-center justify-between gap-1 shadow-sm">
+            <div class="flex items-center gap-2 font-medium">
+                <i class="fa-solid fa-clock-rotate-left text-[#9e764a]"></i>
                 <span id="baseline-info">排名變化比較基準：載入中...</span>
             </div>
-            <span class="text-[11px] text-amber-700/60 hidden sm:inline">以全台股 1,800+ 檔為母體量化計算</span>
+            <span class="text-[11px] text-[#a68a6b]">全市場母體：1,800+ 檔上市櫃股票</span>
         </div>
 
-        <!-- 控制區：搜尋、排序與產業過濾 -->
-        <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-2 text-slate-800 font-bold text-lg w-full sm:w-auto">
+        <!-- 搜尋與排序控制區 -->
+        <div class="bg-white rounded-xl p-3.5 shadow-sm border border-stone-200/80 flex flex-col sm:flex-row justify-between items-center gap-3">
+            <div class="flex items-center gap-2 text-slate-800 font-bold text-base w-full sm:w-auto">
                 <i class="fa-solid fa-trophy text-amber-500"></i>
-                <span>防禦嚴選榜單</span>
+                <span>防禦量化排行榜</span>
             </div>
-            <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 w-full sm:w-auto">
-                <!-- 搜尋框 -->
-                <div class="relative w-full sm:w-48">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
-                    <input type="text" id="search-input" placeholder="搜尋代號/股名/產業..." 
-                           class="w-full pl-8 pr-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto">
+                <div class="relative w-full sm:w-56">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs"></i>
+                    <input type="text" id="search-input" placeholder="搜尋代碼 / 公司 / 產業..." 
+                           class="w-full pl-8 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
                 </div>
-                <!-- 排序選單 -->
-                <select id="sort-select" class="w-full sm:w-auto px-3 py-1.5 text-xs bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-slate-600 font-medium">
+                <select id="sort-select" class="w-full sm:w-auto px-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-600 font-medium">
                     <option value="cp">依 CP 防禦總分排序</option>
                     <option value="yield">依 殖利率 高到低</option>
                     <option value="pe">依 本益比 低到高</option>
@@ -82,9 +76,27 @@
             </div>
         </div>
 
-        <!-- 股票卡片 Container -->
-        <div id="stock-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
-            <!-- 動態由 JavaScript 載入 -->
+        <!-- 核心表格排行榜 (Leaderboard Table) -->
+        <div class="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[800px]">
+                    <thead>
+                        <tr class="bg-[#fcf8f2] text-[#786043] text-xs border-b border-[#f2e6d5] font-bold">
+                            <th class="py-3.5 px-4 w-12 text-center">#</th>
+                            <th class="py-3.5 px-3 w-16 text-center">Δ</th>
+                            <th class="py-3.5 px-3 w-20">代碼</th>
+                            <th class="py-3.5 px-4 w-28">公司</th>
+                            <th class="py-3.5 px-4 w-32">產業</th>
+                            <th class="py-3.5 px-4 w-28 text-right">CP 防禦分數</th>
+                            <th class="py-3.5 px-4">主要數據 (股價 / PE / 殖利率 / 成交額)</th>
+                            <th class="py-3.5 px-4 w-56">智慧風控評語</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stock-table-body" class="divide-y divide-stone-100 text-xs text-slate-700 font-medium">
+                        <!-- 動態由 JavaScript 載入 -->
+                    </tbody>
+                </table>
+            </div>
         </div>
 
     </div>
@@ -104,92 +116,92 @@
                 document.getElementById('baseline-info').innerText = `排名變化比較基準：市場資料 ${mDate}（報表日 ${rDate}）。`;
 
                 globalStocksData = data.stocks || [];
-                renderCards(globalStocksData);
+                renderTable(globalStocksData);
             } catch (error) {
                 console.error("無法載入資料:", error);
                 document.getElementById('update-time').innerText = "資料載入失敗";
             }
         }
 
-        function renderCards(stocks) {
-            const container = document.getElementById('stock-grid');
-            container.innerHTML = '';
+        function renderTable(stocks) {
+            const tbody = document.getElementById('stock-table-body');
+            tbody.innerHTML = '';
 
             if (stocks.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-400">沒有符合條件的股票</div>`;
+                tbody.innerHTML = `<tr><td colSpan="8" class="text-center py-12 text-stone-400">沒有符合條件的股票</td></tr>`;
                 return;
             }
 
             stocks.forEach((stock) => {
-                let rankBadgeStyle = "bg-slate-100 text-slate-600";
-                if (stock.rank === 1) rankBadgeStyle = "bg-amber-500 text-white font-extrabold";
-                else if (stock.rank === 2) rankBadgeStyle = "bg-slate-400 text-white font-extrabold";
-                else if (stock.rank === 3) rankBadgeStyle = "bg-amber-700 text-white font-extrabold";
+                // 名次 Badge
+                let rankBadge = `<span class="text-stone-500 font-bold">${stock.rank}</span>`;
+                if (stock.rank === 1) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-amber-500 text-white rounded-full font-extrabold text-xs shadow-sm">1</span>`;
+                else if (stock.rank === 2) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-slate-400 text-white rounded-full font-extrabold text-xs shadow-sm">2</span>`;
+                else if (stock.rank === 3) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-amber-700 text-white rounded-full font-extrabold text-xs shadow-sm">3</span>`;
 
-                // 名次變動 Delta 渲染 (↑1, ↓4, —)
-                let deltaHtml = `<span class="text-slate-400 font-bold text-xs">—</span>`;
+                // Δ 排名變動 (↑2, ↓1, —)
+                let deltaHtml = `<span class="text-stone-400 font-medium">—</span>`;
                 const delta = stock.rank_delta || 0;
                 if (delta > 0) {
-                    deltaHtml = `<span class="text-emerald-700 font-extrabold text-xs flex items-center">↑${delta}</span>`;
+                    deltaHtml = `<span class="text-emerald-700 font-bold flex items-center justify-center gap-0.5"><i class="fa-solid fa-arrow-up text-[10px]"></i>${delta}</span>`;
                 } else if (delta < 0) {
-                    deltaHtml = `<span class="text-rose-600 font-extrabold text-xs flex items-center">↓${Math.abs(delta)}</span>`;
+                    deltaHtml = `<span class="text-rose-600 font-bold flex items-center justify-center gap-0.5"><i class="fa-solid fa-arrow-down text-[10px]"></i>${Math.abs(delta)}</span>`;
                 }
 
-                const cardHtml = `
-                    <a href="${stock.link}" target="_blank" rel="noopener noreferrer" 
-                       class="block bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-emerald-200 transition duration-200 group relative">
-                        
-                        <!-- 排名、Δ名次變動、代號名稱、產業標籤與 CP 防禦分數 -->
-                        <div class="flex justify-between items-start mb-3">
-                            <div class="space-y-1.5">
-                                <div class="flex items-center gap-2">
-                                    <span class="px-2.5 py-0.5 rounded-md text-xs ${rankBadgeStyle}">#${stock.rank}</span>
-                                    <div class="bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
-                                        ${deltaHtml}
-                                    </div>
-                                    <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${stock.code}</span>
-                                    <span class="text-[11px] bg-emerald-50 text-emerald-700 font-medium px-2 py-0.5 rounded-md border border-emerald-100">
-                                        ${stock.category}
-                                    </span>
-                                </div>
-                                <h3 class="text-lg font-bold text-slate-800 group-hover:text-emerald-600 transition flex items-center gap-1">
-                                    ${stock.name}
-                                    <i class="fa-solid fa-arrow-up-right-from-square text-[10px] text-slate-300 group-hover:text-emerald-500"></i>
-                                </h3>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-[10px] font-bold text-slate-400 block">防禦總分</span>
-                                <span class="text-xl font-extrabold text-emerald-600">${stock.cp_score}</span>
-                            </div>
-                        </div>
+                const rowHtml = `
+                    <tr class="hover:bg-amber-50/30 transition duration-150">
+                        <!-- # 排名 -->
+                        <td class="py-3.5 px-4 text-center">
+                            ${rankBadge}
+                        </td>
 
-                        <!-- 主要四大數據區塊（小白白話標示） -->
-                        <div class="grid grid-cols-2 gap-3 bg-slate-50/80 rounded-xl p-3 text-xs mb-3">
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">股價</span>
-                                <span class="font-bold text-slate-800 text-sm">$${stock.price}</span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">本益比 (回本年數)</span>
-                                <span class="font-bold text-slate-800 text-sm">${stock.pe} 倍</span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">殖利率 (預估年息)</span>
-                                <span class="font-bold text-emerald-600 text-sm">${stock.yield_rate}%</span>
-                            </div>
-                            <div>
-                                <span class="text-slate-400 block mb-0.5">日成交額 (流動性)</span>
-                                <span class="font-bold text-slate-800 text-sm">${stock.turnover_formatted}</span>
-                            </div>
-                        </div>
+                        <!-- Δ 名次變動 -->
+                        <td class="py-3.5 px-3 text-center">
+                            ${deltaHtml}
+                        </td>
 
-                        <!-- 底部 AI 智慧風控評語標籤 -->
-                        <div class="bg-amber-50/70 border border-amber-100/80 rounded-lg p-2.5 text-xs text-amber-900/80 flex items-center gap-2">
-                            <span>${stock.highlight}</span>
-                        </div>
-                    </a>
+                        <!-- 代碼 (超連結) -->
+                        <td class="py-3.5 px-3">
+                            <a href="${stock.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold hover:underline flex items-center gap-1 group">
+                                ${stock.code}
+                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-blue-400 group-hover:text-blue-600"></i>
+                            </a>
+                        </td>
+
+                        <!-- 公司名稱 -->
+                        <td class="py-3.5 px-4 font-bold text-slate-900 text-sm">
+                            ${stock.name}
+                        </td>
+
+                        <!-- 產業別 -->
+                        <td class="py-3.5 px-4 text-stone-500">
+                            ${stock.category}
+                        </td>
+
+                        <!-- CP 防禦總分 -->
+                        <td class="py-3.5 px-4 text-right">
+                            <span class="text-sm font-extrabold text-emerald-600">${stock.cp_score}</span>
+                        </td>
+
+                        <!-- 主要數據區塊 -->
+                        <td class="py-3.5 px-4">
+                            <div class="flex items-center gap-4 text-[11px]">
+                                <div><span class="text-stone-400">股價：</span><span class="font-bold text-slate-800">$${stock.price}</span></div>
+                                <div><span class="text-stone-400">PE：</span><span class="font-bold text-slate-800">${stock.pe}倍</span></div>
+                                <div><span class="text-stone-400">殖利率：</span><span class="font-bold text-emerald-600">${stock.yield_rate}%</span></div>
+                                <div><span class="text-stone-400">成交：</span><span class="font-bold text-slate-800">${stock.turnover_formatted}</span></div>
+                            </div>
+                        </td>
+
+                        <!-- 智慧風控評語 -->
+                        <td class="py-3.5 px-4">
+                            <span class="bg-amber-50/80 text-amber-900/80 border border-amber-200/60 px-2 py-1 rounded text-[11px] inline-block">
+                                ${stock.highlight}
+                            </span>
+                        </td>
+                    </tr>
                 `;
-                container.innerHTML += cardHtml;
+                tbody.innerHTML += rowHtml;
             });
         }
 
@@ -201,10 +213,10 @@
                 s.name.toLowerCase().includes(query) ||
                 s.category.toLowerCase().includes(query)
             );
-            renderCards(filtered);
+            renderTable(filtered);
         });
 
-        // 排序切換機制
+        // 排序機制
         document.getElementById('sort-select').addEventListener('change', (e) => {
             const sortBy = e.target.value;
             let sorted = [...globalStocksData];
@@ -214,7 +226,7 @@
             else if (sortBy === 'pe') sorted.sort((a, b) => a.pe - b.pe);
             else if (sortBy === 'turnover') sorted.sort((a, b) => b.turnover_wan - a.turnover_wan);
 
-            renderCards(sorted);
+            renderTable(sorted);
         });
 
         loadStockData();
