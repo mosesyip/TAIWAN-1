@@ -50,6 +50,15 @@
             </div>
         </div>
 
+        <!-- 比較基準資訊橫條 -->
+        <div class="bg-amber-50/60 border border-amber-100 rounded-xl px-4 py-2.5 text-xs text-amber-900/80 flex items-center justify-between shadow-sm">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-clock-rotate-left text-amber-600"></i>
+                <span id="baseline-info">排名變化比較基準：載入中...</span>
+            </div>
+            <span class="text-[11px] text-amber-700/60 hidden sm:inline">以全台股 1,800+ 檔為母體量化計算</span>
+        </div>
+
         <!-- 控制區：搜尋、排序與產業過濾 -->
         <div class="bg-white rounded-xl p-4 shadow-sm border border-slate-100 flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-2 text-slate-800 font-bold text-lg w-full sm:w-auto">
@@ -89,6 +98,11 @@
                 const data = await response.json();
                 
                 document.getElementById('update-time').innerText = `更新時間：${data.update_time}`;
+                
+                const mDate = data.market_date || '2026-08-06';
+                const rDate = data.report_date || '2026-08-07';
+                document.getElementById('baseline-info').innerText = `排名變化比較基準：市場資料 ${mDate}（報表日 ${rDate}）。`;
+
                 globalStocksData = data.stocks || [];
                 renderCards(globalStocksData);
             } catch (error) {
@@ -112,15 +126,27 @@
                 else if (stock.rank === 2) rankBadgeStyle = "bg-slate-400 text-white font-extrabold";
                 else if (stock.rank === 3) rankBadgeStyle = "bg-amber-700 text-white font-extrabold";
 
+                // 名次變動 Delta 渲染 (↑1, ↓4, —)
+                let deltaHtml = `<span class="text-slate-400 font-bold text-xs">—</span>`;
+                const delta = stock.rank_delta || 0;
+                if (delta > 0) {
+                    deltaHtml = `<span class="text-emerald-700 font-extrabold text-xs flex items-center">↑${delta}</span>`;
+                } else if (delta < 0) {
+                    deltaHtml = `<span class="text-rose-600 font-extrabold text-xs flex items-center">↓${Math.abs(delta)}</span>`;
+                }
+
                 const cardHtml = `
                     <a href="${stock.link}" target="_blank" rel="noopener noreferrer" 
                        class="block bg-white rounded-2xl p-5 shadow-sm border border-slate-100 hover:shadow-md hover:border-emerald-200 transition duration-200 group relative">
                         
-                        <!-- 排名、代號名稱、產業標籤與 CP 防禦分數 -->
+                        <!-- 排名、Δ名次變動、代號名稱、產業標籤與 CP 防禦分數 -->
                         <div class="flex justify-between items-start mb-3">
                             <div class="space-y-1.5">
                                 <div class="flex items-center gap-2">
                                     <span class="px-2.5 py-0.5 rounded-md text-xs ${rankBadgeStyle}">#${stock.rank}</span>
+                                    <div class="bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">
+                                        ${deltaHtml}
+                                    </div>
                                     <span class="text-xs font-bold bg-slate-100 text-slate-600 px-2 py-0.5 rounded">${stock.code}</span>
                                     <span class="text-[11px] bg-emerald-50 text-emerald-700 font-medium px-2 py-0.5 rounded-md border border-emerald-100">
                                         ${stock.category}
@@ -167,7 +193,7 @@
             });
         }
 
-        // 搜尋過濾機制 (支援代號/名稱/產業搜尋)
+        // 搜尋過濾機制
         document.getElementById('search-input').addEventListener('input', (e) => {
             const query = e.target.value.toLowerCase().trim();
             const filtered = globalStocksData.filter(s => 
