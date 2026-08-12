@@ -1,243 +1,44 @@
-<!DOCTYPE html>
-<html lang="zh-TW">
+<!doctype html>
+<html lang="zh-Hant">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>全台股 AI 防禦量化監控台</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>全台股量化選股監控台</title>
+  <style>
+    :root { --ink:#25312d; --muted:#6d7973; --line:#e5e8e3; --paper:#f6f4ee; --card:#fff; --green:#267454; --teal:#287b7a; --amber:#b07d22; }
+    * { box-sizing:border-box; } body { margin:0; background:var(--paper); color:var(--ink); font:14px/1.5 system-ui,-apple-system,"Noto Sans TC",sans-serif; }
+    .wrap { max-width:1500px; margin:auto; padding:28px 32px 48px; } header { display:flex; justify-content:space-between; gap:28px; margin-bottom:20px; } h1 { margin:0; font-size:28px; } .subtitle,.meta { color:var(--muted); } .meta { text-align:right; font-size:13px; } .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin:20px 0; }.card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:15px 18px; }.card strong { display:block; font-size:23px; margin-top:3px; }
+    .tools { display:flex; gap:12px; align-items:center; margin:22px 0 14px; }.tabs { display:flex; gap:8px; } button,select,input { border:1px solid var(--line); background:#fff; border-radius:7px; padding:9px 11px; font:inherit; color:var(--ink); } button { cursor:pointer; } button.active { background:var(--green); border-color:var(--green); color:#fff; } input { width:260px; margin-left:auto; }
+    .table-wrap { background:#fff; border:1px solid var(--line); border-radius:10px; overflow:auto; } table { width:100%; border-collapse:collapse; min-width:1250px; } th { color:var(--muted); font-size:12px; font-weight:600; background:#fbfcfa; white-space:nowrap; } th,td { border-bottom:1px solid var(--line); padding:12px 10px; text-align:left; } tbody tr:hover { background:#fbfdfb; } .num { text-align:right; font-variant-numeric:tabular-nums; } a { color:var(--green); text-decoration:none; font-weight:650; }.score { border-radius:999px; display:inline-block; min-width:43px; text-align:center; padding:3px 8px; font-weight:700; }.s90{background:#e1f0e7;color:#216342}.s80{background:#e3f1ef;color:#176a68}.s70{background:#f8efd6;color:#8a6319}.s0{background:#edf0ed;color:#69736d}.error { background:#fff1f0; color:#9d3630; border:1px solid #f0cbc8; padding:18px; border-radius:10px; }.note { color:var(--muted); margin:12px 0 0; font-size:12px; }
+    @media (max-width:850px) { .wrap{padding:18px}.cards{grid-template-columns:repeat(2,1fr)} header{display:block}.meta{text-align:left;margin-top:12px}.tools{flex-wrap:wrap}input{margin-left:0;width:auto} }
+  </style>
 </head>
-<body class="bg-[#fcfbf9] text-slate-800 font-sans min-h-screen p-3 md:p-8">
-
-    <div class="max-w-7xl mx-auto space-y-5">
-
-        <!-- 頁頭頂部與數據新鮮度驗證標籤 -->
-        <header class="bg-white rounded-2xl p-5 md:p-6 shadow-sm border border-stone-200/80 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-            <div>
-                <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-3">
-                    <i class="fa-solid fa-shield-halved text-emerald-600"></i> 全台股 AI 量化嚴選監控台
-                </h1>
-                <p class="text-stone-500 text-xs md:text-sm mt-1">100% 官方第一手 OpenAPI 數據：每日自動掃描全台股高流動性與優質估值標的</p>
-            </div>
-            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                <a href="https://openapi.twse.com.tw/v1/exchangeReport/BWIBBU_ALL" target="_blank" rel="noopener noreferrer" class="text-[11px] bg-stone-100 hover:bg-stone-200 text-stone-600 px-2.5 py-1 rounded-md border border-stone-200 transition">
-                    <i class="fa-solid fa-link text-[10px] mr-1"></i>官方 OpenAPI 驗證
-                </a>
-                <div id="update-badge" class="bg-emerald-50 text-emerald-800 text-xs font-semibold px-3 py-1.5 rounded-full border border-emerald-200/60 flex items-center gap-2 shrink-0">
-                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="update-time">載入中...</span>
-                </div>
-            </div>
-        </header>
-
-        <!-- 模組頁籤切換 (總覽 / 防禦 / 動能) -->
-        <div class="bg-white rounded-xl p-2 border border-stone-200/80 shadow-sm flex flex-wrap gap-2">
-            <button id="btn-overall" onclick="switchTab('overall')" class="px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-slate-900 text-white shadow-sm flex items-center gap-2">
-                <i class="fa-solid fa-layer-group"></i> 攻守兼備 (總覽)
-            </button>
-            <button id="btn-defense" onclick="switchTab('defense')" class="px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2">
-                <i class="fa-solid fa-shield"></i> 防禦價值榜
-            </button>
-            <button id="btn-momentum" onclick="switchTab('momentum')" class="px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2">
-                <i class="fa-solid fa-bolt"></i> 營運動能 / 熱度榜
-            </button>
-        </div>
-
-        <!-- 排名比較基準提示列 (截圖風格) -->
-        <div class="bg-[#f7f2ea] border border-[#ebdccb] rounded-xl px-4 py-2.5 text-xs text-[#735638] flex flex-col sm:flex-row sm:items-center justify-between gap-1 shadow-sm">
-            <div class="flex items-center gap-2 font-medium">
-                <i class="fa-solid fa-clock-rotate-left text-[#9e764a]"></i>
-                <span id="baseline-info">排名變化比較基準：載入中...</span>
-            </div>
-            <span class="text-[11px] text-[#a68a6b]">全市場母體：1,800+ 檔上市櫃股票</span>
-        </div>
-
-        <!-- 搜尋與排序控制區 -->
-        <div class="bg-white rounded-xl p-3.5 shadow-sm border border-stone-200/80 flex flex-col sm:flex-row justify-between items-center gap-3">
-            <div class="flex items-center gap-2 text-slate-800 font-bold text-base w-full sm:w-auto">
-                <i class="fa-solid fa-trophy text-amber-500"></i>
-                <span id="current-tab-title">防禦量化排行榜 (攻守兼備)</span>
-            </div>
-            <div class="flex flex-wrap sm:flex-nowrap items-center gap-2.5 w-full sm:w-auto">
-                <div class="relative w-full sm:w-56">
-                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-stone-400 text-xs"></i>
-                    <input type="text" id="search-input" placeholder="搜尋代碼 / 公司 / 產業..." 
-                           class="w-full pl-8 pr-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500">
-                </div>
-                <select id="sort-select" class="w-full sm:w-auto px-3 py-1.5 text-xs bg-stone-50 border border-stone-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 text-stone-600 font-medium">
-                    <option value="score">依 模組分數 高到低</option>
-                    <option value="yield">依 殖利率 高到低</option>
-                    <option value="pe">依 本益比 低到高</option>
-                    <option value="turnover">依 成交金額 高到低</option>
-                </select>
-            </div>
-        </div>
-
-        <!-- 核心表格排行榜 (Leaderboard Table) -->
-        <div class="bg-white rounded-2xl shadow-sm border border-stone-200/80 overflow-hidden">
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[800px]">
-                    <thead>
-                        <tr class="bg-[#fcf8f2] text-[#786043] text-xs border-b border-[#f2e6d5] font-bold">
-                            <th class="py-3.5 px-4 w-12 text-center">#</th>
-                            <th class="py-3.5 px-3 w-16 text-center">Δ</th>
-                            <th class="py-3.5 px-3 w-20">代碼</th>
-                            <th class="py-3.5 px-4 w-28">公司</th>
-                            <th class="py-3.5 px-4 w-32">產業</th>
-                            <th class="py-3.5 px-4 w-28 text-right">模型總分</th>
-                            <th class="py-3.5 px-4">主要數據 (股價 / PE / 殖利率 / 成交額)</th>
-                            <th class="py-3.5 px-4 w-56">智慧風控評語</th>
-                        </tr>
-                    </thead>
-                    <tbody id="stock-table-body" class="divide-y divide-stone-100 text-xs text-slate-700 font-medium">
-                        <!-- 動態載入 -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-    </div>
-
-    <script>
-        let allData = {};
-        let currentTab = 'overall';
-
-        async function loadStockData() {
-            try {
-                const response = await fetch(`data.json?v=${Date.now()}`);
-                allData = await response.json();
-                
-                document.getElementById('update-time').innerText = `更新時間：${allData.update_time}`;
-                
-                const mDate = allData.market_date || '2026-08-06';
-                const rDate = allData.report_date || '2026-08-07';
-                document.getElementById('baseline-info').innerText = `排名變化比較基準：市場資料 ${mDate}（報表日 ${rDate}）。`;
-
-                renderCurrentTab();
-            } catch (error) {
-                console.error("無法載入資料:", error);
-                document.getElementById('update-time').innerText = "資料載入失敗";
-            }
-        }
-
-        function switchTab(tab) {
-            currentTab = tab;
-            
-            // 按鈕視覺切換
-            ['overall', 'defense', 'momentum'].forEach(t => {
-                const btn = document.getElementById(`btn-${t}`);
-                if (t === tab) {
-                    btn.className = "px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-slate-900 text-white shadow-sm flex items-center gap-2";
-                } else {
-                    btn.className = "px-5 py-2.5 rounded-lg font-bold text-xs transition duration-150 bg-stone-100 text-stone-600 hover:bg-stone-200 flex items-center gap-2";
-                }
-            });
-
-            const titles = {
-                'overall': '防禦量化排行榜 (攻守兼備總覽)',
-                'defense': '防禦量化排行榜 (高殖利率與低估值)',
-                'momentum': '防禦量化排行榜 (市場熱度與營運動能)'
-            };
-            document.getElementById('current-tab-title').innerText = titles[tab];
-
-            renderCurrentTab();
-        }
-
-        function renderCurrentTab() {
-            let listKey = 'stocks_overall';
-            if (currentTab === 'defense') listKey = 'stocks_defense';
-            else if (currentTab === 'momentum') listKey = 'stocks_momentum';
-
-            const stocks = allData[listKey] || [];
-            renderTable(stocks);
-        }
-
-        function renderTable(stocks) {
-            const tbody = document.getElementById('stock-table-body');
-            tbody.innerHTML = '';
-
-            if (stocks.length === 0) {
-                tbody.innerHTML = `<tr><td colSpan="8" class="text-center py-12 text-stone-400">沒有符合條件的股票</td></tr>`;
-                return;
-            }
-
-            stocks.forEach((stock) => {
-                let rankBadge = `<span class="text-stone-500 font-bold">${stock.rank}</span>`;
-                if (stock.rank === 1) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-amber-500 text-white rounded-full font-extrabold text-xs shadow-sm">1</span>`;
-                else if (stock.rank === 2) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-slate-400 text-white rounded-full font-extrabold text-xs shadow-sm">2</span>`;
-                else if (stock.rank === 3) rankBadge = `<span class="w-6 h-6 inline-flex items-center justify-center bg-amber-700 text-white rounded-full font-extrabold text-xs shadow-sm">3</span>`;
-
-                let deltaHtml = `<span class="text-stone-400 font-medium">—</span>`;
-                const delta = stock.rank_delta || 0;
-                if (delta > 0) {
-                    deltaHtml = `<span class="text-emerald-700 font-bold flex items-center justify-center gap-0.5"><i class="fa-solid fa-arrow-up text-[10px]"></i>${delta}</span>`;
-                } else if (delta < 0) {
-                    deltaHtml = `<span class="text-rose-600 font-bold flex items-center justify-center gap-0.5"><i class="fa-solid fa-arrow-down text-[10px]"></i>${Math.abs(delta)}</span>`;
-                }
-
-                const rowHtml = `
-                    <tr class="hover:bg-amber-50/30 transition duration-150">
-                        <td class="py-3.5 px-4 text-center">${rankBadge}</td>
-                        <td class="py-3.5 px-3 text-center">${deltaHtml}</td>
-                        <td class="py-3.5 px-3">
-                            <a href="${stock.link}" target="_blank" rel="noopener noreferrer" class="text-blue-600 font-semibold hover:underline flex items-center gap-1 group">
-                                ${stock.code}
-                                <i class="fa-solid fa-arrow-up-right-from-square text-[9px] text-blue-400 group-hover:text-blue-600"></i>
-                            </a>
-                        </td>
-                        <td class="py-3.5 px-4 font-bold text-slate-900 text-sm">${stock.name}</td>
-                        <td class="py-3.5 px-4 text-stone-500">${stock.category}</td>
-                        <td class="py-3.5 px-4 text-right">
-                            <span class="text-sm font-extrabold text-emerald-600">${stock.active_score}</span>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <div class="flex items-center gap-4 text-[11px]">
-                                <div><span class="text-stone-400">股價：</span><span class="font-bold text-slate-800">$${stock.price}</span></div>
-                                <div><span class="text-stone-400">PE：</span><span class="font-bold text-slate-800">${stock.pe}倍</span></div>
-                                <div><span class="text-stone-400">殖利率：</span><span class="font-bold text-emerald-600">${stock.yield_rate}%</span></div>
-                                <div><span class="text-stone-400">成交：</span><span class="font-bold text-slate-800">${stock.turnover_formatted}</span></div>
-                            </div>
-                        </td>
-                        <td class="py-3.5 px-4">
-                            <span class="bg-amber-50/80 text-amber-900/80 border border-amber-200/60 px-2 py-1 rounded text-[11px] inline-block">
-                                ${stock.highlight}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-                tbody.innerHTML += rowHtml;
-            });
-        }
-
-        // 搜尋機制
-        document.getElementById('search-input').addEventListener('input', (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            let listKey = currentTab === 'overall' ? 'stocks_overall' : (currentTab === 'defense' ? 'stocks_defense' : 'stocks_momentum');
-            const stocks = allData[listKey] || [];
-            const filtered = stocks.filter(s => 
-                s.code.toLowerCase().includes(query) || 
-                s.name.toLowerCase().includes(query) ||
-                s.category.toLowerCase().includes(query)
-            );
-            renderTable(filtered);
-        });
-
-        // 排序機制
-        document.getElementById('sort-select').addEventListener('change', (e) => {
-            const sortBy = e.target.value;
-            let listKey = currentTab === 'overall' ? 'stocks_overall' : (currentTab === 'defense' ? 'stocks_defense' : 'stocks_momentum');
-            let sorted = [...(allData[listKey] || [])];
-
-            if (sortBy === 'score') sorted.sort((a, b) => b.active_score - a.active_score);
-            else if (sortBy === 'yield') sorted.sort((a, b) => b.yield_rate - a.yield_rate);
-            else if (sortBy === 'pe') sorted.sort((a, b) => a.pe - b.pe);
-            else if (sortBy === 'turnover') sorted.sort((a, b) => b.turnover_wan - a.turnover_wan);
-
-            renderTable(sorted);
-        });
-
-        loadStockData();
-    </script>
-</body>
-</html>
+<body>
+  <main class="wrap">
+    <header>
+      <div><h1>🛡️ 全台股量化選股監控台</h1><div class="subtitle">基本面 × 估值 × 股息 × 流動性 × 成長潛力</div></div>
+      <div class="meta" id="meta">資料更新時間：載入中…<br>資料日期：—<br><a href="https://openapi.twse.com.tw/" target="_blank" rel="noopener">資料來源：TWSE / TPEx OpenAPI</a></div>
+    </header>
+    <section class="cards"><div class="card">通過篩選<strong id="passed">—</strong></div><div class="card">精選<strong id="elite">20 檔</strong></div><div class="card">資料日期<strong id="date">—</strong></div><div class="card">模型版本<strong>Quant V2</strong></div></section>
+    <section class="tools"><div class="tabs"><button class="active" data-list="stocks_overall">⭐ 綜合 CP</button><button data-list="stocks_defense">🛡️ 防禦價值</button><button data-list="stocks_momentum">🚀 成長 / 動能</button></div><input id="search" aria-label="搜尋" placeholder="搜尋代碼 / 公司 / 產業 / 評語"><select id="sort" aria-label="排序"><option value="active_score">綜合分數</option><option value="value_score">Value</option><option value="growth_score">Growth</option><option value="quality_score">Quality</option><option value="yield_rate">殖利率</option><option value="pe">PE</option><option value="turnover_10k">成交金額</option></select></section>
+    <div id="content" class="table-wrap"></div><p class="note">本網站僅提供資料整理與自訂量化模型分析，不構成投資建議；分數不代表未來報酬。</p>
+  </main>
+<script>
+(() => {
+  const content = document.querySelector('#content'), search = document.querySelector('#search'), sort = document.querySelector('#sort');
+  let payload, activeList = 'stocks_overall';
+  const fmt = (v, suffix='') => v === null || v === undefined ? '—' : `${Number(v).toLocaleString('zh-TW', {maximumFractionDigits:2})}${suffix}`;
+  const score = v => `<span class="score s${v >= 90 ? 90 : v >= 80 ? 80 : v >= 70 ? 70 : 0}">${fmt(v)}</span>`;
+  const render = () => {
+    const query = search.value.trim().toLowerCase(); const key = sort.value;
+    let list = [...(payload[activeList] || [])].filter(s => [s.code,s.name,s.category,s.highlight].join(' ').toLowerCase().includes(query));
+    list.sort((a,b) => { const av=a[key], bv=b[key]; if (av == null && bv == null) return 0; if (av == null) return 1; if (bv == null) return -1; return key === 'pe' ? av-bv : bv-av; });
+    content.innerHTML = `<table><thead><tr><th>#<br>排名</th><th>代碼</th><th>公司</th><th>產業</th><th class="num">CP</th><th class="num">Value</th><th class="num">Growth</th><th class="num">Quality</th><th class="num">股價</th><th class="num">PE</th><th class="num">殖利率</th><th class="num">成交額</th><th>模型評語</th></tr></thead><tbody>${list.map((s,i)=>`<tr><td>${i+1}</td><td><a href="${s.link}" target="_blank" rel="noopener">${s.code}</a></td><td>${s.name}</td><td>${s.category || '—'}</td><td class="num">${score(s.overall_score)}</td><td class="num">${fmt(s.value_score)}</td><td class="num">${fmt(s.growth_score)}</td><td class="num">${fmt(s.quality_score)}</td><td class="num">${fmt(s.price)}</td><td class="num">${fmt(s.pe)}</td><td class="num">${fmt(s.yield_rate,'%')}</td><td class="num">${s.turnover_formatted || '—'}</td><td>${s.highlight || '—'}</td></tr>`).join('') || '<tr><td colspan="13">沒有符合搜尋條件的股票。</td></tr>'}</tbody></table>`;
+  };
+  fetch('./data.json?v=' + Date.now()).then(r => { if (!r.ok) throw new Error(`HTTP ${r.status}`); return r.json(); }).then(data => {
+    payload=data; if (data.status) throw new Error(data.status); document.querySelector('#passed').textContent=`${data.all_passed_count ?? '—'} 檔`; document.querySelector('#elite').textContent=`${(data.elite_20 || []).length} 檔`; document.querySelector('#date').textContent=data.market_date || '—'; document.querySelector('#meta').innerHTML=`資料更新時間：${data.update_time || '—'}<br>資料日期：${data.market_date || '—'}<br><a href="https://openapi.twse.com.tw/" target="_blank" rel="noopener">資料來源：TWSE / TPEx OpenAPI</a>`; render();
+  }).catch(error => { console.error('data.json load error:', error); content.className='error'; content.innerHTML='資料載入失敗<br><small>請確認 data.json 是否存在，或 GitHub Actions 是否成功更新。</small>'; });
+  document.querySelectorAll('[data-list]').forEach(button => button.addEventListener('click', () => { document.querySelector('.active').classList.remove('active'); button.classList.add('active'); activeList=button.dataset.list; sort.value='active_score'; render(); })); search.addEventListener('input',render); sort.addEventListener('change',render);
+})();
+</script>
+</body></html>
